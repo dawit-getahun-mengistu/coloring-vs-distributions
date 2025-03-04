@@ -22,8 +22,8 @@ transform = transforms.Compose([
 
 class MNIST:
     def __init__(self, data_path: str = directory, img_size: int = img_size, train_batch_size: int = cfg.TRAIN_BATCH_SIZE, test_batch_size: int = cfg.TEST_BATCH_SIZE):
-        self.data_path = os.makedirs(
-            os.path.join(data_path, 'mnist'), exist_ok=True)
+        self.data_path = os.path.join(data_path, 'mnist')
+        os.makedirs(self.data_path, exist_ok=True)
         self.img_size = img_size
         self.train_batch_size = train_batch_size
         self.test_batch_size = test_batch_size
@@ -56,8 +56,8 @@ class MNIST:
 
 class FashionMNIST:
     def __init__(self, data_path: str = directory, img_size: int = img_size, train_batch_size: int = cfg.TRAIN_BATCH_SIZE, test_batch_size: int = cfg.TEST_BATCH_SIZE):
-        self.data_path = os.makedirs(
-            os.path.join(data_path, 'fashion-mnist'), exist_ok=True)
+        self.data_path = os.path.join(data_path, 'fashion-mnist')
+        os.makedirs(self.data_path, exist_ok=True)
         self.img_size = img_size
         self.train_batch_size = train_batch_size
         self.test_batch_size = test_batch_size
@@ -68,10 +68,10 @@ class FashionMNIST:
             transforms.ToTensor()
         ])
 
-        self.train_dataset = datasets.MNIST(
+        self.train_dataset = datasets.FashionMNIST(
             root=self.data_path, train=True, transform=self.transform, download=True
         )
-        self.test_dataset = datasets.MNIST(
+        self.test_dataset = datasets.FashionMNIST(
             root=self.data_path, train=False, transform=self.transform, download=True
         )
 

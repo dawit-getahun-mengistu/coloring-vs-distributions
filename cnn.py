@@ -1,0 +1,95 @@
+import torch
+import torch.nn as nn
+import torch.nn.functional as F
+
+
+# initialize with xavier
+def init_cnn(module):
+    """Initialize weights for CNNs."""
+    if type(module) == nn.Linear or type(module) == nn.Conv2d:
+        nn.init.xavier_uniform_(module.weight)
+
+
+class LeNetBasedModel(nn.Module):
+    """LeNet based model"""
+
+    def __init__(self, in_channels=3, num_classes=10):
+        super().__init__()
+        self.network = nn.Sequential(
+            # Input: (in_channels, 32, 32)
+            nn.Conv2d(in_channels, 6, kernel_size=5),    # -> (6, 28, 28)
+            nn.ReLU(),
+            nn.MaxPool2d(2, 2),                          # -> (6, 14, 14)
+
+            nn.Conv2d(6, 16, kernel_size=5),              # -> (16, 10, 10)
+            nn.ReLU(),
+            nn.MaxPool2d(2, 2),                           # -> (16, 5, 5)
+
+            nn.Flatten(),
+            nn.Linear(16 * 5 * 5, 120),
+            nn.ReLU(),
+            nn.Linear(120, 84),
+            nn.ReLU(),
+            nn.Linear(84, num_classes)
+        )
+
+        # Apply weight initialization
+        self.apply(init_cnn)
+
+    def forward(self, x):
+        return self.network(x)
+
+
+class VGGInspiredCNN(nn.Module):
+    def __init__(self, input_channels=3, num_classes=10):
+        super(VGGInspiredCNN, self).__init__()
+        # Convolutional block 1
+        self.conv1 = nn.Conv2d(
+            input_channels, 64, kernel_size=3, stride=1, padding=1)
+        self.bn1 = nn.BatchNorm2d(64)
+        # Convolutional block 2
+        self.conv2 = nn.Conv2d(64, 128, kernel_size=3, stride=1, padding=1)
+        self.bn2 = nn.BatchNorm2d(128)
+        # Convolutional block 3
+        self.conv3 = nn.Conv2d(128, 256, kernel_size=3, stride=1, padding=1)
+        self.bn3 = nn.BatchNorm2d(256)
+
+        # Max pooling layer with a 2x2 kernel (applied after each conv block)
+        self.pool = nn.MaxPool2d(kernel_size=2, stride=2)
+
+        # Assuming input size of 32x32, after three poolings: 32 -> 16 -> 8 -> 4.
+        # The flattened feature dimension is then 256 * 4 * 4 = 4096.
+        self.fc1 = nn.Linear(256 * 4 * 4, 512)  # first dense layer
+        self.fc2 = nn.Linear(512, 128)          # second dense layer
+        self.fc3 = nn.Linear(128, num_classes)  # decision layer
+
+    def forward(self, x):
+        # Convolutional Block 1
+        x = self.conv1(x)
+        x = self.bn1(x)
+        x = F.relu(x)
+        x = self.pool(x)
+
+        # Convolutional Block 2
+        x = self.conv2(x)
+        x = self.bn2(x)
+        x = F.relu(x)
+        x = self.pool(x)
+
+        # Convolutional Block 3
+        x = self.conv3(x)
+        x = self.bn3(x)
+        x = F.relu(x)
+        x = self.pool(x)
+
+        # Flatten the feature maps for the fully connected layers
+        x = torch.flatten(x, 1)
+
+        # Fully connected layers
+        x = F.relu(self.fc1(x))
+        x = F.relu(self.fc2(x))
+        x = self.fc3(x)
+
+        # Softmax activation for classification
+        x = F.softmax(x, dim=1)
+        return x
