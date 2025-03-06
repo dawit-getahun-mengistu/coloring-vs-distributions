@@ -1,4 +1,5 @@
 import torch
+import enum
 
 DATASET_PATH = 'data/'
 
@@ -14,3 +15,9 @@ fashion_mnist_classes = [
     "T-shirt/top", "Trouser", "Pullover", "Dress", "Coat",
     "Sandal", "Shirt", "Sneaker", "Bag", "Ankle boot"
 ]
+
+
+class NormalizationType(enum.Enum):
+    batch = 'batch'
+    instance = 'instance'
+    layer = 'layer'
