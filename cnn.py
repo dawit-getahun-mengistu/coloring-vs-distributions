@@ -168,6 +168,7 @@ class VGGInspiredCNN(nn.Module):
 
 
 if __name__ == '__main__':
+    from cfg import device
     base_model = LeNetBasedModel()
 
     models = [copy.deepcopy(base_model) for _ in range(2)]
@@ -175,19 +176,19 @@ if __name__ == '__main__':
           models[1].network[0].weight))
 
     torch.manual_seed(42)
-    model1 = LeNetBasedModel()
+    model1 = LeNetBasedModel().to(device)
 
     torch.manual_seed(42)
     model2 = LeNetBasedModelWithNormalization(
-        normalization_type=NormalizationType.batch)
+        normalization_type=NormalizationType.batch).to(device)
 
     torch.manual_seed(42)
     model3 = LeNetBasedModelWithNormalization(
-        normalization_type=NormalizationType.layer)
+        normalization_type=NormalizationType.layer).to(device)
 
     torch.manual_seed(42)
     model4 = LeNetBasedModelWithNormalization(
-        normalization_type=NormalizationType.instance)
+        normalization_type=NormalizationType.instance).to(device)
 
     print(torch.equal(model1.network[0].weight, model2.conv1.weight), torch.equal(
         model1.network[3].weight, model2.conv2.weight), torch.equal(model1.network[7].weight, model2.fc1.weight), torch.equal(model1.network[9].weight, model2.fc2.weight), torch.equal(model1.network[11].weight, model2.fc3.weight))
